@@ -1,9 +1,12 @@
+use serde::{Serialize, Deserialize};
+
 use crate::{ffi::ipc::IpcMemHandle, DeviceBuffer, DeviceId};
 use crate::ffi::memory::DeviceBuffer as DeviceBufferInternal;
 use crate::runtime::Future;
 
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
+#[derive(Serialize, Deserialize)]
 pub struct IpcMemHandleSized<T: Copy> {
     pub num_elements: usize,
     internal: IpcMemHandle,

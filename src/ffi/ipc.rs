@@ -1,4 +1,5 @@
 use cpp::cpp;
+use serde::{Serialize, Deserialize};
 
 use crate::ffi::result;
 use crate::ffi::ptr::DevicePtr;
@@ -6,7 +7,7 @@ use crate::ffi::ptr::DevicePtr;
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub struct IpcMemHandle {
     pub reserved: [::std::ffi::c_char; 64usize],
 }
