@@ -1,5 +1,6 @@
 use crate::{ffi::ipc::IpcMemHandle, DeviceBuffer, DeviceId};
 use crate::ffi::memory::DeviceBuffer as DeviceBufferInternal;
+use crate::runtime::Future;
 
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
@@ -15,16 +16,18 @@ unsafe impl<T: Copy> Sync for IpcMemHandleSized<T> {}
 
 impl <T: Copy> IpcMemHandleSized<T> {
 
-    pub fn new_from_device_buffer(buffer: DeviceBuffer<T>) -> Result<Self> {
-        let inner = buffer.inner();
-        let d_ptr = inner.as_internal();
-        let internal = unsafe { IpcMemHandle::from_device_ptr(d_ptr)? };
-        Ok(Self {
-            num_elements: inner.num_elements,
-            internal,
-            device: inner.device,
-            _phantom: Default::default()
-        })
+    pub async fn new_from_device_buffer(buffer: DeviceBuffer<T>) -> Result<Self> {
+        Future::new(move || {
+            let inner = buffer.inner();
+            let d_ptr = inner.as_internal();
+            let internal = unsafe { IpcMemHandle::from_device_ptr(d_ptr)? };
+            Ok(Self {
+                num_elements: inner.num_elements,
+                internal,
+                device: inner.device,
+                _phantom: Default::default()
+            })
+        }).await
     }
 
 }
@@ -49,11 +52,15 @@ impl<T: Copy + 'static> Drop for IpcMemHandleGuard<'_, T> {
 
 impl <T: Copy + 'static> IpcMemHandleGuard<'_, T> {
 
-    fn new<'handle>(handle: &'handle IpcMemHandleSized<T>) -> Result<IpcMemHandleGuard<'handle, T>> {
-        let d_ptr = unsafe { handle.internal.get_device_ptr() }?;
+    pub async fn new<'handle>(handle: &'handle IpcMemHandleSized<T>) -> Result<IpcMemHandleGuard<'handle, T>> {
+        let buffer_internal = Future::new(move || {
+            unsafe {
+                let d_ptr = handle.internal.get_device_ptr()?;
 
-        let buffer_internal = unsafe { DeviceBufferInternal::from_num_elems_internal_device(
-            handle.num_elements, d_ptr, handle.device) };
+                Ok(DeviceBufferInternal::from_num_elems_internal_device(
+                    handle.num_elements, d_ptr, handle.device))
+            }
+        }).await?;
 
         Ok(IpcMemHandleGuard { 
             handle: handle, 
@@ -61,11 +68,11 @@ impl <T: Copy + 'static> IpcMemHandleGuard<'_, T> {
         })
     }
 
-    fn buffer(&self) -> &DeviceBuffer<T> {
+    pub fn buffer(&self) -> &DeviceBuffer<T> {
         &self.buffer
     }
 
-    fn buffer_mut(&mut self) -> &mut DeviceBuffer<T> {
+    pub fn buffer_mut(&mut self) -> &mut DeviceBuffer<T> {
         &mut self.buffer
     }
     
