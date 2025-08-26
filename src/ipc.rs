@@ -6,7 +6,7 @@ use crate::runtime::Future;
 
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub struct IpcMemHandleSized<T: Copy> {
     pub num_elements: usize,
     internal: IpcMemHandle,
