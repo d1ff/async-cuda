@@ -25,7 +25,7 @@ impl IpcMemHandle {
     pub unsafe fn from_device_ptr(ptr: &DevicePtr) -> Result<Self> {
         let mut handle = IpcMemHandle::default();
         let ptr = ptr.as_ptr();
-        let handle_ptr = std::ptr::addr_of_mut!(handle);
+        let handle_ptr = std::ptr::addr_of_mut!(handle.reserved);
 
         let ret = cpp!(unsafe [
             handle_ptr as "void*",
@@ -40,7 +40,7 @@ impl IpcMemHandle {
     pub unsafe fn get_device_ptr(self) -> Result<DevicePtr> {
         let mut d_ptr: *mut std::ffi::c_void = std::ptr::null_mut();
         let d_ptr_ptr = std::ptr::addr_of_mut!(d_ptr);
-        let handle = self;
+        let handle = self.reserved;
 
         let ret = cpp!(unsafe [
             d_ptr_ptr as "void**",
