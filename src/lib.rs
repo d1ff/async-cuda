@@ -3,6 +3,7 @@
 pub mod device;
 pub mod error;
 pub mod ffi;
+pub mod ipc;
 pub mod memory;
 pub mod runtime;
 pub mod stream;

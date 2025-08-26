@@ -46,6 +46,12 @@ impl<T: Copy + 'static> DeviceBuffer<T> {
         Self { inner }
     }
 
+    pub(crate) unsafe fn from_internal(inner: ffi::memory::DeviceBuffer<T>) -> Self {
+        Self {
+            inner
+        }
+    }
+
     /// Allocate memory on the device, and copy data from host into it.
     ///
     /// This function creates a temporary [`HostBuffer`], copies the slice into it, then finally

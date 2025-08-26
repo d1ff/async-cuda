@@ -2,6 +2,7 @@ mod includes;
 
 pub mod device;
 pub mod error;
+pub mod ipc;
 pub mod memory;
 pub mod ptr;
 pub mod stream;

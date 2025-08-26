@@ -15,7 +15,7 @@ type Result<T> = std::result::Result<T, crate::error::Error>;
 pub struct DeviceBuffer<T: Copy> {
     pub num_elements: usize,
     internal: DevicePtr,
-    device: DeviceId,
+    pub(crate) device: DeviceId,
     _phantom: std::marker::PhantomData<T>,
 }
 
@@ -34,6 +34,19 @@ unsafe impl<T: Copy> Send for DeviceBuffer<T> {}
 unsafe impl<T: Copy> Sync for DeviceBuffer<T> {}
 
 impl<T: Copy> DeviceBuffer<T> {
+
+    pub(crate) unsafe fn from_num_elems_internal_device(num_elements: usize,
+        internal: DevicePtr, 
+        device: DeviceId) -> Self {
+
+        Self {
+            num_elements,
+            internal,
+            device,
+            _phantom: Default::default(),
+        }
+    }
+
     pub fn new(num_elements: usize, stream: &Stream) -> Self {
         let device = Device::get_or_panic();
         let mut ptr: *mut std::ffi::c_void = std::ptr::null_mut();
