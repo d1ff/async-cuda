@@ -19,7 +19,7 @@ unsafe impl<T: Copy> Sync for IpcMemHandleSized<T> {}
 
 impl <T: Copy> IpcMemHandleSized<T> {
 
-    pub async fn new_from_device_buffer(buffer: DeviceBuffer<T>) -> Result<Self> {
+    pub async fn new_from_device_buffer(buffer: &DeviceBuffer<T>) -> Result<Self> {
         Future::new(move || {
             let inner = buffer.inner();
             let d_ptr = inner.as_internal();
