@@ -1,5 +1,6 @@
 use cpp::cpp;
 use serde::{Serialize, Deserialize};
+use serde_big_array::BigArray;
 
 use crate::ffi::result;
 use crate::ffi::ptr::DevicePtr;
@@ -9,6 +10,7 @@ type Result<T> = std::result::Result<T, crate::error::Error>;
 #[repr(C)]
 #[derive(Copy, Clone, Serialize, Deserialize)]
 pub struct IpcMemHandle {
+    #[serde(with = "BigArray")]
     pub reserved: [::std::ffi::c_char; 64usize],
 }
 
